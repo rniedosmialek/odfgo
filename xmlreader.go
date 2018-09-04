@@ -1,11 +1,9 @@
 package odfgo
 
 import (
-	"archive/zip"
+	"encoding/xml"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -13,61 +11,35 @@ type xmlreader struct {
 	fileName string
 }
 
-func (zr xmlreader) searchZip(filePath string) string {
+func (xr xmlreader) readXML() {
 
-	var content string = ""
-
-	// Open a zip archive for reading.
-	r, err := zip.OpenReader(zr.fileName)
+	// Open our xmlFile
+	xmlFile, err := os.Open(xr.fileName)
+	// if we os.Open returns an error then handle it
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 
-	defer r.Close()
+	fmt.Println("Successfully Opened users.xml")
+	// defer the closing of our xmlFile so that we can parse it later on
+	defer xmlFile.Close()
 
-	// Iterate through the files in the archive,
-	// printing some of their contents.
-	for _, f := range r.File {
+	// read our opened xmlFile as a byte array.
+	byteValue, _ := ioutil.ReadAll(xmlFile)
 
-		if f.Name == filePath {
+	// we initialize our Users array
+	var users Users
+	// we unmarshal our byteArray which contains our
+	// xmlFiles content into 'users' which we defined above
+	xml.Unmarshal(byteValue, &users)
 
-			rc, err := f.Open()
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			content, err := ioutil.ReadFile(rc)
-			if err != nil {
-				log.Fatal(err)
-			}
-			_, err = io.CopyN(os.Stdout, rc, 68)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			rc.Close()
-
-		}
-	}
-
-	return content
-
-}
-
-func (zr xmlreader) readZip() {
-
-	// Open a zip archive for reading.
-	r, err := zip.OpenReader(zr.fileName)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer r.Close()
-
-	// Iterate through the files in the archive,
-	// printing some of their contents.
-	for _, f := range r.File {
-		fmt.Printf("Contents of %s:\n", f.Name)
+	// we iterate through every user within our users array and
+	// print out the user Type, their name, and their facebook url
+	// as just an example
+	for i := 0; i < len(users.Users); i++ {
+		fmt.Println("User Type: " + users.Users[i].Type)
+		fmt.Println("User Name: " + users.Users[i].Name)
+		fmt.Println("Facebook Url: " + users.Users[i].Social.Facebook)
 	}
 
 }
