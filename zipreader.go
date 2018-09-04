@@ -1,12 +1,10 @@
 package odfgo
 
 import (
-"archive/zip"
-"fmt"
-"io"
-"io/ioutil"
-"log"
-"os"
+	"archive/zip"
+	"fmt"
+	"io"
+	"log"
 )
 
 type zipreader struct {
@@ -38,12 +36,7 @@ func (zr zipreader) searchZip(filePath string) []byte {
 
 			content := make([]byte, f.FileInfo().Size())
 
-			_, err := io.ReadFull(rc, buf)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			_, err = io.Copy(rc, buf)
+			_, err = io.ReadFull(rc, content)
 			if err != nil {
 				log.Fatal(err)
 			}
